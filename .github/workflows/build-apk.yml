@@ -98,6 +98,13 @@ jobs:
               }
           }
           EOF
+          
+          # إنشاء gradle.properties مع تفعيل AndroidX
+          cat > gradle.properties << 'EOF'
+          android.useAndroidX=true
+          android.enableJetifier=true
+          org.gradle.jvmargs=-Xmx2048m
+          EOF
 
       - name: 🛠️ Build APK with Gradle
         run: |
