@@ -20,21 +20,31 @@ jobs:
       - name: 🤖 Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
+          packages: 'platforms;android-34 build-tools;34.0.0'
           
+      - name: 📜 Accept Android SDK Licenses
+        run: |
+          mkdir -p /usr/local/lib/android/sdk/licenses
+          echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" > /usr/local/lib/android/sdk/licenses/android-sdk-license
+          echo "d56f5187479451eabf01fb78af6dfcb131a6481e" > /usr/local/lib/android/sdk/licenses/android-sdk-preview-license
+          echo "8933bad161af4178b1185d1a37fbf41ea5269c55" > /usr/local/lib/android/sdk/licenses/android-googletv-license
+          echo "84831b9409646a918e30573bab4c9c91346d8abd" > /usr/local/lib/android/sdk/licenses/android-sdk-arm-dbt-license
+          echo "601085b94cd77f0b54ff86406957099ebe79c4d6" > /usr/local/lib/android/sdk/licenses/google-gms-license
+          echo "33b6a2b64607f11b759f320ef9dff4ae5c47d97a" > /usr/local/lib/android/sdk/licenses/mips-android-sysimage-license
+
       - name: 📁 Create Android project structure
         run: |
-          # إنشاء هيكل مشروع Android بسيط
+          # إنشاء هيكل مشروع Android
           mkdir -p app/src/main/java/com/stealth/browser
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/values
           
-          # نسخ الملفات من مكانها الحالي إلى الهيكل الجديد
+          # نسخ الملفات من الجذر إلى أماكنها الصحيحة
           cp AndroidManifest.xml app/src/main/ 2>/dev/null || true
           cp MainActivity.java app/src/main/java/com/stealth/browser/ 2>/dev/null || true
           cp activity_main.xml app/src/main/res/layout/ 2>/dev/null || true
           
-          # إنشاء strings.xml بسيط
+          # إنشاء strings.xml
           echo '<resources><string name="app_name">Stealth Survey</string></resources>' > app/src/main/res/values/strings.xml
           
           # إنشاء build.gradle للتطبيق
@@ -70,10 +80,22 @@ jobs:
           # إنشاء settings.gradle في الجذر
           echo "include ':app'" > settings.gradle
           
-          # إنشاء build.gradle في الجذر
+          # إنشاء build.gradle في الجذر مع مستودع Google
           cat > build.gradle << 'EOF'
-          plugins {
-              id 'com.android.application' version '8.2.0' apply false
+          buildscript {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:8.2.0'
+              }
+          }
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
           }
           EOF
 
