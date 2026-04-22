@@ -34,20 +34,16 @@ jobs:
 
       - name: 📁 Create Android project structure
         run: |
-          # إنشاء هيكل مشروع Android
           mkdir -p app/src/main/java/com/stealth/browser
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/values
           
-          # نسخ الملفات من الجذر إلى أماكنها الصحيحة
           cp AndroidManifest.xml app/src/main/ 2>/dev/null || true
           cp MainActivity.java app/src/main/java/com/stealth/browser/ 2>/dev/null || true
           cp activity_main.xml app/src/main/res/layout/ 2>/dev/null || true
           
-          # إنشاء strings.xml
           echo '<resources><string name="app_name">Stealth Survey</string></resources>' > app/src/main/res/values/strings.xml
           
-          # إنشاء build.gradle للتطبيق
           cat > app/build.gradle << 'EOF'
           plugins {
               id 'com.android.application'
@@ -72,15 +68,19 @@ jobs:
                   targetCompatibility JavaVersion.VERSION_1_8
               }
           }
+          configurations {
+              all {
+                  exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+                  exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+              }
+          }
           dependencies {
               implementation 'androidx.appcompat:appcompat:1.7.0'
           }
           EOF
           
-          # إنشاء settings.gradle في الجذر
           echo "include ':app'" > settings.gradle
           
-          # إنشاء build.gradle في الجذر مع مستودع Google
           cat > build.gradle << 'EOF'
           buildscript {
               repositories {
@@ -99,7 +99,6 @@ jobs:
           }
           EOF
           
-          # إنشاء gradle.properties مع تفعيل AndroidX
           cat > gradle.properties << 'EOF'
           android.useAndroidX=true
           android.enableJetifier=true
@@ -107,8 +106,7 @@ jobs:
           EOF
 
       - name: 🛠️ Build APK with Gradle
-        run: |
-          gradle assembleRelease
+        run: gradle assembleRelease
           
       - name: 📤 Upload APK
         uses: actions/upload-artifact@v4
